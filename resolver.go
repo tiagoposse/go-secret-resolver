@@ -9,11 +9,11 @@ import (
 )
 
 type ResolverField struct {
-	File   *string `yaml:"file"`
-	Value  *string `yaml:"value"`
-	Aws    *string `yaml:"aws"`
-	Google *string `yaml:"google"`
-	Azure  *string `yaml:"azure"`
+	File   *string `yaml:"file" mapstructure:"file" json:"file"`
+	Value  *string `yaml:"value" mapstructure:"value" json:"value"`
+	Aws    *string `yaml:"aws" mapstructure:"aws" json:"aws"`
+	Google *string `yaml:"google" mapstructure:"google" json:"google"`
+	Azure  *string `yaml:"azure" mapstructure:"azure" json:"azure"`
 }
 
 type Resolver struct {
