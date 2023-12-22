@@ -13,7 +13,7 @@ type AzureResolver struct {
 	client *azsecrets.Client
 }
 
-func NewAzureResolver() (*AzureResolver, error) {
+func NewAzureResolver(_ context.Context) (*AzureResolver, error) {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
 		return nil, err
@@ -34,8 +34,8 @@ func NewAzureResolver() (*AzureResolver, error) {
 	}, nil
 }
 
-func (az *AzureResolver) ResolveSecret(secretName string) (string, error) {
-	secret, err := az.client.GetSecret(context.Background(), secretName, "", nil)
+func (az *AzureResolver) ResolveSecret(ctx context.Context, secretName string) (string, error) {
+	secret, err := az.client.GetSecret(ctx, secretName, "", nil)
 	if err != nil {
 		return "", err
 	}

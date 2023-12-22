@@ -11,8 +11,8 @@ type AwsResolver struct {
 	client *secretsmanager.Client
 }
 
-func NewAwsResolver() (*AwsResolver, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+func NewAwsResolver(ctx context.Context) (*AwsResolver, error) {
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -22,12 +22,12 @@ func NewAwsResolver() (*AwsResolver, error) {
 	}, nil
 }
 
-func (aws *AwsResolver) ResolveSecret(secretName string) (string, error) {
+func (aws *AwsResolver) ResolveSecret(ctx context.Context, secretName string) (string, error) {
 	input := &secretsmanager.GetSecretValueInput{
 		SecretId: &secretName,
 	}
 
-	output, err := aws.client.GetSecretValue(context.TODO(), input)
+	output, err := aws.client.GetSecretValue(ctx, input)
 	if err != nil {
 		return "", err
 	}

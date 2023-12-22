@@ -1,9 +1,11 @@
 package resolvers
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type ResolverField struct {
@@ -25,7 +27,7 @@ func NewResolver() *Resolver {
 }
 
 // resolve resolves the secret value based on the given name.
-func (r *Resolver) Resolve(field *ResolverField) error {
+func (r *Resolver) Resolve(ctx context.Context, field *ResolverField) error {
 	var err error
 
 	if field.Value != nil {
@@ -45,12 +47,12 @@ func (r *Resolver) Resolve(field *ResolverField) error {
 	// Check for AWS secret
 	if field.Aws != nil {
 		if r.aws == nil {
-			if r.aws, err = NewAwsResolver(); err != nil {
+			if r.aws, err = NewAwsResolver(ctx); err != nil {
 				return fmt.Errorf("creating aws resolver: %w", err)
 			}
 		}
 
-		val, err := r.aws.ResolveSecret(*field.Aws)
+		val, err := r.aws.ResolveSecret(ctx, *field.Aws)
 		if err != nil {
 			return fmt.Errorf("resolving aws secret: %s", *field.Aws)
 		}
@@ -61,12 +63,12 @@ func (r *Resolver) Resolve(field *ResolverField) error {
 	// Check for Google secret
 	if field.Google != nil {
 		if r.google == nil {
-			if r.google, err = NewGoogleResolver(); err != nil {
+			if r.google, err = NewGoogleResolver(ctx); err != nil {
 				return fmt.Errorf("creating google resolver: %w", err)
 			}
 		}
 
-		val, err := r.google.ResolveSecret(*field.Google)
+		val, err := r.google.ResolveSecret(ctx, *field.Google)
 		if err != nil {
 			return fmt.Errorf("resolving google secret: %s", *field.Google)
 		}
@@ -77,12 +79,12 @@ func (r *Resolver) Resolve(field *ResolverField) error {
 	// Check for Azure secret
 	if field.Azure != nil {
 		if r.az == nil {
-			if r.az, err = NewAzureResolver(); err != nil {
+			if r.az, err = NewAzureResolver(ctx); err != nil {
 				return fmt.Errorf("creating azure resolver: %w", err)
 			}
 		}
 
-		val, err := r.az.ResolveSecret(*field.Azure)
+		val, err := r.az.ResolveSecret(ctx, *field.Azure)
 		if err != nil {
 			return fmt.Errorf("resolving azure secret: %s", *field.Azure)
 		}
@@ -107,5 +109,6 @@ func getFileValue(filePath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(data), nil
+
+	return strings.TrimSpace(string(data)), nil
 }
