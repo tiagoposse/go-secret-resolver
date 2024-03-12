@@ -10,6 +10,7 @@ import (
 
 type ResolverField struct {
 	File   *string `yaml:"file" mapstructure:"file" json:"file"`
+	Env    *string `yaml:"env" mapstructure:"env" json:"env"`
 	Value  *string `yaml:"value" mapstructure:"value" json:"value"`
 	Aws    *string `yaml:"aws" mapstructure:"aws" json:"aws"`
 	Google *string `yaml:"google" mapstructure:"google" json:"google"`
@@ -44,6 +45,16 @@ func (r *Resolver) Resolve(ctx context.Context, field *ResolverField) error {
 		return nil
 	}
 
+	if field.Env != nil {
+		val, ok := os.LookupEnv(*field.Env)
+		if !ok {
+			return fmt.Errorf("env variable %s not present", *field.Env)
+		}
+
+		field.Value = &val
+		return nil
+	}
+
 	// Check for AWS secret
 	if field.Aws != nil {
 		if r.aws == nil {
@@ -54,7 +65,7 @@ func (r *Resolver) Resolve(ctx context.Context, field *ResolverField) error {
 
 		val, err := r.aws.ResolveSecret(ctx, *field.Aws)
 		if err != nil {
-			return fmt.Errorf("resolving aws secret: %s", *field.Aws)
+			return fmt.Errorf("resolving aws secret: %s: %w", *field.Aws, err)
 		}
 		field.Value = &val
 		return nil
